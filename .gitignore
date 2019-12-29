@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# SVGs generated during testing
+*.svg
+
+
 # C extensions
 *.so
 
