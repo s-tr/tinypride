@@ -11,12 +11,12 @@ class SVGOutput:
     This class defines useful methods for drawing using SVGs.
     """
 
-    def __init__(self, height=1080, width=1920):
+    def __init__(self, height=1080, width=1920, original_svg=None):
         self.height = height
         self.width = width
         self.strokeWidth = 1
         self.colour = "#ffffff"
-        self.svg = ET.Element("svg",
+        self.svg = original_svg or ET.Element("svg",
             viewBox=("0 0 %d %d" % (width,height)),
             xmlns="http://www.w3.org/2000/svg")
 
