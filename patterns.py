@@ -20,7 +20,10 @@ class Artist:
         """
         outfile.write(ET.tostring(self.output.svg, pretty_print=True))
 
-    def stringArt1(x, y, r, nNodes, spacing, offset=0, colour="#ffffff", strokeWidth=1):
+    def background(self, colour):
+        self.output.background(colour)
+
+    def stringArt1(self, x, y, r, nNodes, spacing, offset=0, colour="#ffffff", strokeWidth=1):
         """
         Generates a form of string art. On a circle with ``n`` equally
         spaced notches on its rim, every node ``i`` is connected to
@@ -39,7 +42,7 @@ class Artist:
         for i in range(nNodes):
             self.output.nodeChord(x, y, r, nNodes, offset, i, i+spacing)
 
-    def stringArt2(x, y, r, nNodes, colourList, offset=0, strokeWidth=1):
+    def stringArt2(self, x, y, r, nNodes, colourList, offset=0, strokeWidth=1):
         """
         """
 
@@ -61,7 +64,7 @@ class Artist:
                 self.output.nodeChord(x, y, r, nNodes, offset, beginning+j, beginning+j*nColours)
 
 
-    def arcs(x, y, r, colourList, spacing=0.035, offset=0, clockwise=False, strokeWidth=1):
+    def arcs(self, x, y, r, colourList, spacing=0.035, offset=0, clockwise=False, strokeWidth=1):
         """
         Creates a circle out of arcs of the specified colours.
         """
@@ -85,4 +88,14 @@ class Artist:
                 fromAngle = offset + i*sectorSize + spacing/2,
                 toAngle = offset + (i+1)*sectorSize - spacing/2)
 
-    def dotmatrix()
+    def inscribed(self, x, y, r, nSides, gradient, endpoint=0.5, factor=0.97, clockwise=True):
+        pass
+
+    def dots(self, x, y, spacing, dotRadius, angle, colours):
+        pass
+
+    def minimalFlag(self, x, y, h, w, lineWidth, colours):
+        pass
+
+    def flag(self, x, y, h, w, colours, proportions=None, angle=None):
+        pass
