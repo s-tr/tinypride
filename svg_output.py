@@ -6,6 +6,8 @@ import sys
 import math
 import lxml.etree as ET
 
+import util as U
+
 class SVGOutput:
     """
     This class defines useful methods for drawing using SVGs.
@@ -16,7 +18,6 @@ class SVGOutput:
         self.width = width
         self.strokeWidth = 1
         self.colour = "#ffffff"
-        self.svg = 
         if originalSVG is None:
             self.svg = ET.Element("svg",
                 width=str(width), height=str(height),
@@ -60,10 +61,8 @@ class SVGOutput:
         Angles are measured as in mathematics, with the zero angle
         being directly rightwards and going anticlockwise.
         """
-        x1 = x + r*math.cos(fromAngle)
-        y1 = y - r*math.sin(fromAngle)
-        x2 = x + r*math.cos(toAngle)
-        y2 = y - r*math.sin(toAngle)
+        x1, y1 = U.fromPolar(x, y, r, fromAngle)
+        x2, y2 = U.fromPolar(x, y, r, toAngle)
         self.line(x1, y1, x2, y2)
 
     def nodeChord(self, x, y, r, nNodes, offset, fromPoint, toPoint):
@@ -92,27 +91,22 @@ class SVGOutput:
         """
         Draws an arc on the circle centred at (x,y) with radius r
         from the point at angle fromAngle to the point at toAngle.
-
-        Angles are measured as in mathematics, with the zero angle
-        being directly rightwards and going anticlockwise.
         """
 
         # make sure fromAngle < toAngle
-        if fromAngle > toAngle:
-            self.arc(x, y, r, toAngle, fromAngle)
+        # if fromAngle > toAngle:
+        #    self.arc(x, y, r, toAngle, fromAngle)
 
-        x1 = x + r*math.cos(fromAngle)
-        y1 = y - r*math.sin(fromAngle)
-        x2 = x + r*math.cos(toAngle)
-        y2 = y - r*math.sin(toAngle)
+        x1, y1 = U.fromPolar(x, y, r, fromAngle)
+        x2, y2 = U.fromPolar(x, y, r, toAngle)
 
         # large-arc flag in <path> element
-        largeArc = 0 if toAngle-fromAngle < math.pi else 1
+        largeArc = "0" if toAngle-fromAngle < math.pi else "1"
 
         # commands for the <path> element
         command = ' '.join([
-            "M", str(x1), str(y1),
-            "A", str(r), str(r), "0", str(largeArc), "0", str(x2), str(y2)
+            "M", str(x2), str(y2),
+            "A", str(r), str(r), "0", largeArc, "0", str(x1), str(y1)
         ]);
 
         self._emit(ET.Element("path",

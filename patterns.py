@@ -27,7 +27,7 @@ class Artist:
         """
         Generates a form of string art. On a circle with ``n`` equally
         spaced notches on its rim, every node ``i`` is connected to
-        another node ``i+k`` for some k.
+        another node ``i+spacing`` modulo ``nNodes``.
         """
 
         if nNodes<2:
@@ -59,19 +59,15 @@ class Artist:
         self.output.setStrokeWidth(strokeWidth)
         for i in range(nColours):
             self.output.setColour(colourList[i])
-            beginning = i * nNodesPerColour
+            beginning = i * (nNodesPerColour)
             for j in range(nNodesPerColour):
                 self.output.nodeChord(x, y, r, nNodes, offset, beginning+j, beginning+j*nColours)
 
 
-    def arcs(self, x, y, r, colourList, spacing=0.035, offset=0, clockwise=False, strokeWidth=1):
+    def arcs(self, x, y, r, colourList, spacing=0.035, offset=0, strokeWidth=1):
         """
         Creates a circle out of arcs of the specified colours.
         """
-
-        if clockwise == True:
-            arcs(x, y, r, colourList[::-1],
-                spacing=spacing, offset=offset, clockwise=False, strokeWidth=strokeWidth)
 
         if len(colourList) < 2:
             raise ValueError("Must have 2 or more colours")
@@ -87,15 +83,3 @@ class Artist:
             self.output.arc(x, y, r,
                 fromAngle = offset + i*sectorSize + spacing/2,
                 toAngle = offset + (i+1)*sectorSize - spacing/2)
-
-    def inscribed(self, x, y, r, nSides, gradient, endpoint=0.5, factor=0.97, clockwise=True):
-        pass
-
-    def dots(self, x, y, spacing, dotRadius, angle, colours):
-        pass
-
-    def minimalFlag(self, x, y, h, w, lineWidth, colours):
-        pass
-
-    def flag(self, x, y, h, w, colours, proportions=None, angle=None):
-        pass
