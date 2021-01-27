@@ -83,3 +83,6 @@ class Artist:
             self.output.arc(x, y, r,
                 fromAngle = offset + i*sectorSize + spacing/2,
                 toAngle = offset + (i+1)*sectorSize - spacing/2)
+
+    def flag(self, x, y, width, height, colours, proportions=None, angle = math.pi/2):
+        pass

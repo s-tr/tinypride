@@ -113,6 +113,13 @@ class SVGOutput:
             d=command,
             fill="none"))
         
+    def polygon(self, points, fill=None):
+        pointsStrs = ["{},{}".format(x,y) for (x,y) in points]
+        self._emit(ET.Element("polygon",
+            points=' '.join(pointsStrs),
+            fill=fill or "none"))
 
+    def rectangle(self, x, y, width, height, fill=None):
+        self.polygon([(x,y),(x+width, y), (x+width, y+height), (x, y+height)], fill)
 
 
