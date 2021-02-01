@@ -84,28 +84,53 @@ class Artist:
                 fromAngle = offset + i*sectorSize + spacing/2,
                 toAngle = offset + (i+1)*sectorSize - spacing/2)
 
-    def flag(self, x, y, width, height, colours, proportions=None, angle = math.pi/2, border=None, borderWidth = 1):
+    def flag(self, x, y, width, height, colours, proportions=None, angle = math.pi/2, border=None, borderColour=None, borderWidth = 1):
         """
         Angle = how far away from the vertical the stripes are tilted.
         0 = vertical, pi/2 = horizontal
         """
         
         def line_coords(pos):
+            """
+            For a line a proportion `pos` of the way from top left to bottom
+            right, finds the coordinates of the top and bottom.
+            """
             if pos <= ratio_top:
-                x_top = x + width*pos/ratio_top
-                y_top = y
+                if ratio_top == 0:
+                    x_top, y_top = x,y
+                else:
+                    x_top = x + width*pos/ratio_top
+                    y_top = y
             else:
                 x_top = x + width
                 y_top = y + height*(pos-ratio_top)/(1-ratio_top)
             if pos <= ratio_bottom:
-                x_bottom = x
-                y_bottom = y + height*pos/ratio_bottom
+                if ratio_bottom == 0:
+                    x_bottom, y_bottom = x,y
+                else:
+                    x_bottom = x
+                    y_bottom = y + height*pos/ratio_bottom
             else:
                 x_bottom = x + width*(pos-ratio_bottom)/(1-ratio_bottom)
                 y_bottom = y + height
             return x_top, y_top, x_bottom, y_bottom
 
+        def angle_as_number():
+            if angle == 'vertical':
+                return 0
+            elif angle == 'horizontal':
+                return math.pi/2
+            elif angle == 'diagonal':
+                return math.atan2(width, height)
+            elif float(angle) == angle:
+                if angle < 0 or angle > math.pi/2:
+                    raise ValueError("Angle must be in [0, pi/2]")
+                else:
+                    return angle
+            else:
+                raise ValueError("Invalid angle "+str(angle))
 
+        # default: all stripes are the same width
         if proportions is None:
             proportions = [1] * len(colours)
 
@@ -116,9 +141,10 @@ class Artist:
             raise ValueError("Empty colour list")
         if len(proportions) != len(colours):
             raise ValueError("Proportions list length is different from colours list length")
-        if angle < 0 or angle > math.pi/2:
-            raise ValueError("Angle must be in [0, pi/2]")
 
+        angle = angle_as_number()
+
+        # compute the positions of each stripe
         scaled_proportions = [p/sum(proportions) for p in proportions]
         stripes = []
         accum = 0
@@ -126,11 +152,16 @@ class Artist:
             stripes.append((accum, accum+prop))
             accum += prop
 
+        # useful ratios for detecting when a stripe crosses a corner
         H_ = height*math.sin(angle)
         W_ = width*math.cos(angle)
         L_ = H_ + W_
         ratio_top = W_ / L_
         ratio_bottom = H_ / L_
+
+
+        self.output.setColour("none")
+        self.output.setStrokeWidth(0)
 
         for i, colour in enumerate(colours):
             points = []
@@ -138,6 +169,7 @@ class Artist:
             x_start_top, y_start_top, x_start_bottom, y_start_bottom = line_coords(stripe_start)
             x_end_top, y_end_top, x_end_bottom, y_end_bottom = line_coords(stripe_end)
 
+            # compute the boundary of the stripe
             points.append((x_start_top, y_start_top))
             points.append((x_start_bottom, y_start_bottom))
 
@@ -152,8 +184,6 @@ class Artist:
                 # stripe crosses bottom corner
                 points.append((x+width,y))
 
-            self.output.setColour(colour)
-            self.output.setStrokeWidth(0)
             self.output.polygon(points,fill = colour)
 
         if border is not None:
