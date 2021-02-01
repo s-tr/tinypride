@@ -84,5 +84,80 @@ class Artist:
                 fromAngle = offset + i*sectorSize + spacing/2,
                 toAngle = offset + (i+1)*sectorSize - spacing/2)
 
-    def flag(self, x, y, width, height, colours, proportions=None, angle = math.pi/2):
-        pass
+    def flag(self, x, y, width, height, colours, proportions=None, angle = math.pi/2, border=None, borderWidth = 1):
+        """
+        Angle = how far away from the vertical the stripes are tilted.
+        0 = vertical, pi/2 = horizontal
+        """
+        
+        def line_coords(pos):
+            if pos <= ratio_top:
+                x_top = x + width*pos/ratio_top
+                y_top = y
+            else:
+                x_top = x + width
+                y_top = y + height*(pos-ratio_top)/(1-ratio_top)
+            if pos <= ratio_bottom:
+                x_bottom = x
+                y_bottom = y + height*pos/ratio_bottom
+            else:
+                x_bottom = x + width*(pos-ratio_bottom)/(1-ratio_bottom)
+                y_bottom = y + height
+            return x_top, y_top, x_bottom, y_bottom
+
+
+        if proportions is None:
+            proportions = [1] * len(colours)
+
+        colours = list(colours)
+        if width <= 0 or height <= 0:
+            raise ValueError("Width and height must be positive")
+        if len(colours) == 0:
+            raise ValueError("Empty colour list")
+        if len(proportions) != len(colours):
+            raise ValueError("Proportions list length is different from colours list length")
+        if angle < 0 or angle > math.pi/2:
+            raise ValueError("Angle must be in [0, pi/2]")
+
+        scaled_proportions = [p/sum(proportions) for p in proportions]
+        stripes = []
+        accum = 0
+        for prop in scaled_proportions:
+            stripes.append((accum, accum+prop))
+            accum += prop
+
+        H_ = height*math.sin(angle)
+        W_ = width*math.cos(angle)
+        L_ = H_ + W_
+        ratio_top = W_ / L_
+        ratio_bottom = H_ / L_
+
+        for i, colour in enumerate(colours):
+            points = []
+            stripe_start, stripe_end = stripes[i]
+            x_start_top, y_start_top, x_start_bottom, y_start_bottom = line_coords(stripe_start)
+            x_end_top, y_end_top, x_end_bottom, y_end_bottom = line_coords(stripe_end)
+
+            points.append((x_start_top, y_start_top))
+            points.append((x_start_bottom, y_start_bottom))
+
+            if stripe_start <= ratio_bottom and stripe_end > ratio_bottom:
+                # stripe crosses bottom corner
+                points.append((x,y+height))
+
+            points.append((x_end_bottom, y_end_bottom))
+            points.append((x_end_top, y_end_top))
+
+            if stripe_start <= ratio_top and stripe_end > ratio_top:
+                # stripe crosses bottom corner
+                points.append((x+width,y))
+
+            self.output.setColour(colour)
+            self.output.setStrokeWidth(0)
+            self.output.polygon(points,fill = colour)
+
+        if border is not None:
+            self.output.setColour(colour)
+            self.output.setStrokeWidth(borderWidth)
+            self.output.rectangle(x,y,width,height)
+
